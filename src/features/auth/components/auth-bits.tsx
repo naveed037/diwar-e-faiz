@@ -62,10 +62,20 @@ export function OrDivider() {
   );
 }
 
+/** Setup hints are for developers only; visitors on a live site see a neutral message. */
+const isDev = process.env.NODE_ENV === "development";
+
 export function NotConfiguredNotice() {
   return (
     <FormAlert tone="info">
-      Accounts aren&apos;t switched on yet. The site owner needs to add the Firebase settings in <code>.env.local</code>.
+      Sign-in is temporarily unavailable. Please try again a little later.
+      {isDev && (
+        <>
+          {" "}
+          (Developer: the <code>NEXT_PUBLIC_FIREBASE_*</code> variables were missing when this app was built — add them to{" "}
+          <code>.env.local</code> or your host&apos;s environment settings and rebuild.)
+        </>
+      )}
     </FormAlert>
   );
 }

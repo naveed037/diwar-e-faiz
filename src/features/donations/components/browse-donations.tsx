@@ -78,8 +78,10 @@ export function BrowseDonations({
   if (!initialPage.available) {
     return (
       <FormAlert tone="info">
-        Donations will appear here once the site is connected to its database. If you run this site, add the Firebase settings to{" "}
-        <code>.env.local</code>.
+        Donations are temporarily unavailable. Please try again a little later.
+        {process.env.NODE_ENV === "development" && (
+          <> (Developer: the server-side FIREBASE_* variables are missing — add them to .env.local or your host&apos;s settings.)</>
+        )}
       </FormAlert>
     );
   }
