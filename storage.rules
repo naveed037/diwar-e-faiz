@@ -1,0 +1,50 @@
+rules_version = '2';
+
+// Diwar-e-Faiz Storage security rules
+//
+// Uploads go directly from the browser, so these rules are the gatekeeper for files:
+// owners may only write inside their own folder, only images, only within size limits.
+// The server re-checks every uploaded file (owner path, content type, size) before referencing it.
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // Uploading to an existing path is evaluated as `create`, not `update`, so "no overwrite"
+    // must be enforced here: a file can only be created where none exists yet. This stops a donor
+    // from swapping a photo after their listing was approved.
+    function isNewFile() {
+      return resource == null;
+    }
+
+    function isImageUnder(maxBytes) {
+      return request.resource.contentType.matches('image/(jpeg|jpg|png|webp|gif|heic|heif)')
+        && request.resource.size > 0
+        && request.resource.size < maxBytes;
+    }
+
+    // donations/{uid}/{donationId}/{file} — listing photos (≤ 5 MB). Verified email required, like donating.
+    match /donations/{uid}/{donationId}/{fileName} {
+      allow read: if true;
+      allow create: if isOwner(uid)
+        && isNewFile()
+        && request.auth.token.email_verified == true
+        && isImageUnder(5 * 1024 * 1024);
+      allow update: if false;
+      allow delete: if isOwner(uid);
+    }
+
+    // users/{uid}/avatar/{file} — profile pictures (≤ 2 MB).
+    match /users/{uid}/avatar/{fileName} {
+      allow read: if true;
+      allow create: if isOwner(uid) && isNewFile() && isImageUnder(2 * 1024 * 1024);
+      allow update: if false;
+      allow delete: if isOwner(uid);
+    }
+
+    // Everything else is denied by default.
+  }
+}

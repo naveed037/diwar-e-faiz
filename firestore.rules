@@ -1,0 +1,92 @@
+rules_version = '2';
+
+// Diwar-e-Faiz Firestore security rules
+//
+// Model: clients are READ-ONLY. Every write goes through Next.js server actions, which verify the
+// session, validate input with zod and write with the Admin SDK (which bypasses these rules).
+// These rules therefore only decide who may READ what, and deny every direct client write.
+// Admin rights come from the `admin` custom claim, which only the Admin SDK can set.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isUser(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function isAdmin() {
+      return signedIn() && request.auth.token.admin == true;
+    }
+
+    // ---------- Users ----------
+    // users/{uid} holds ONLY public profile fields (name, photo, city, area, bio, stats).
+    match /users/{uid} {
+      allow read: if true;
+      allow write: if false;
+
+      // Email, phone and preferences: the owner (and admins) only.
+      match /private/{docId} {
+        allow read: if isUser(uid) || isAdmin();
+        allow write: if false;
+      }
+
+      match /notifications/{notificationId} {
+        allow read: if isUser(uid);
+        allow write: if false;
+      }
+    }
+
+    // ---------- Categories ----------
+    match /categories/{slug} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // ---------- Donations ----------
+    // Public once approved and not removed; the donor and admins can always see their own listing.
+    // List queries must include matching filters (e.g. where moderation.state == "approved").
+    match /donations/{donationId} {
+      allow read: if (resource.data.moderation.state == 'approved' && resource.data.status != 'removed')
+        || isUser(resource.data.donorId)
+        || isAdmin();
+      allow write: if false;
+    }
+
+    // ---------- Applications (requests) ----------
+    // Visible only to the two people involved.
+    match /applications/{applicationId} {
+      allow read: if isUser(resource.data.donorId) || isUser(resource.data.applicantId) || isAdmin();
+      allow write: if false;
+    }
+
+    // ---------- Conversations & messages ----------
+    match /conversations/{conversationId} {
+      allow read: if signedIn() && request.auth.uid in resource.data.participantIds;
+      allow write: if false;
+
+      match /messages/{messageId} {
+        allow read: if signedIn()
+          && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds;
+        allow write: if false;
+      }
+    }
+
+    // ---------- Reports ----------
+    match /reports/{reportId} {
+      allow read: if isUser(resource.data.reporterId) || isAdmin();
+      allow write: if false;
+    }
+
+    // ---------- Success stories ----------
+    match /successStories/{storyId} {
+      allow read: if resource.data.status == 'published' || isUser(resource.data.authorId) || isAdmin();
+      allow write: if false;
+    }
+
+    // Anything not matched above (e.g. _healthchecks) is server-only.
+  }
+}

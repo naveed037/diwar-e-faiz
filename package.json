@@ -6,21 +6,46 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run tests/unit",
+    "test:auth": "vitest run tests/e2e",
+    "firebase:check": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/firebase-check.ts",
+    "firebase:seed": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/seed.ts",
+    "firebase:deploy-rules": "firebase deploy --only firestore:rules,firestore:indexes,storage",
+    "firebase:emulators": "firebase emulators:start --project demo-diwar-e-faiz",
+    "admin:grant": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/set-admin.ts grant",
+    "admin:revoke": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/set-admin.ts revoke",
+    "admin:moderate": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/moderate.ts",
+    "firebase:emulators:auth": "firebase emulators:start --only auth --project demo-diwar-e-faiz",
+    "test:integration": "vitest run tests/integration",
+    "test:rules": "firebase emulators:exec --only firestore,storage --project demo-diwar-rules \"vitest run tests/rules\""
   },
   "dependencies": {
+    "clsx": "^2.1.1",
+    "firebase": "^13.3.0",
+    "firebase-admin": "^14.5.1",
+    "lucide-react": "^1.73.0",
     "next": "16.4.6",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "server-only": "^0.0.1",
+    "tailwind-merge": "^3.7.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^6.0.0",
     "@tailwindcss/turbopack": "4.3.3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^18.0.10",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
+    "firebase-tools": "^15.36.0",
     "tailwindcss": "4.3.3",
-    "typescript": "^5"
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "vitest": "^3.2.4"
   }
 }
