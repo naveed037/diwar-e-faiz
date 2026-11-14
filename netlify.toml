@@ -1,0 +1,12 @@
+# Netlify deploys Next.js through its OpenNext adapter (@netlify/plugin-nextjs), detected automatically.
+# Secrets are NOT stored here — set them in Netlify: Site configuration → Environment variables
+# (the same names as .env.example).
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+  # Telemetry off in CI builds.
+  NEXT_TELEMETRY_DISABLED = "1"
