@@ -42,7 +42,9 @@ npm run firebase:check          # verifies every credential and service, with fi
 npm run dev                     # http://localhost:3000
 ```
 
-Make yourself an admin (needed to approve listings): `npm run admin:grant -- you@example.com`
+Make yourself an admin (needed to approve listings): `npm run admin:grant -- you@example.com`, then sign out and in again.
+Admins review new listings at **`/admin/moderation`** (also linked from the account menu). Non-admins get a 404 there;
+every decision is re-authorised on the server. The `admin:moderate` CLI does the same from a terminal.
 
 ### Environment variables
 

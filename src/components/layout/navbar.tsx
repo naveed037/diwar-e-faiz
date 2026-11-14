@@ -169,6 +169,11 @@ export function Navbar() {
                     <Link href="/my-donations" onClick={close}>
                       My donations
                     </Link>
+                    {auth.user.isAdmin && (
+                      <Link href="/admin/moderation" onClick={close}>
+                        Moderation
+                      </Link>
+                    )}
                   </p>
                 </div>
                 <Button

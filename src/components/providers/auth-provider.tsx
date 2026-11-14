@@ -11,6 +11,8 @@ export type AuthUser = {
   email: string | null;
   photoURL: string | null;
   emailVerified: boolean;
+  /** From the ID token's `admin` custom claim. UI hint only (e.g. showing a menu link) — the server re-checks. */
+  isAdmin: boolean;
 };
 
 type AuthStatus = "loading" | "signed-in" | "signed-out" | "unconfigured";
@@ -18,13 +20,17 @@ type AuthContextValue = { status: AuthStatus; user: AuthUser | null; refresh: ()
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-const toAuthUser = (u: User): AuthUser => ({
-  uid: u.uid,
-  displayName: u.displayName,
-  email: u.email,
-  photoURL: u.photoURL,
-  emailVerified: u.emailVerified,
-});
+async function toAuthUser(u: User): Promise<AuthUser> {
+  const token = await u.getIdTokenResult().catch(() => null);
+  return {
+    uid: u.uid,
+    displayName: u.displayName,
+    email: u.email,
+    photoURL: u.photoURL,
+    emailVerified: u.emailVerified,
+    isAdmin: token?.claims.admin === true,
+  };
+}
 
 /**
  * Tracks the Firebase Auth user for UI purposes (navbar, menus). Authorisation never relies on this:
@@ -53,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         }
       }
-      setUser(fbUser ? toAuthUser(fbUser) : null);
+      setUser(fbUser ? await toAuthUser(fbUser) : null);
       setStatus(fbUser ? "signed-in" : "signed-out");
     });
   }, []);
@@ -63,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const current = getFirebaseAuth().currentUser;
     if (!current) return;
     await current.reload();
-    setUser(toAuthUser(current));
+    setUser(await toAuthUser(current));
   }, []);
 
   const value = useMemo(() => ({ status, user, refresh }), [status, user, refresh]);

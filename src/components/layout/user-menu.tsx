@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, HandHeart, LogOut, PackageOpen, UserRound } from "lucide-react";
+import { ChevronDown, HandHeart, LogOut, PackageOpen, ShieldCheck, UserRound } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -89,6 +89,16 @@ export function UserMenu() {
           <Link role="menuitem" href="/my-donations" onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm text-ink-800 hover:bg-cream-100">
             <PackageOpen className="size-4 text-sand-500" aria-hidden /> My donations
           </Link>
+          {user.isAdmin && (
+            <Link
+              role="menuitem"
+              href="/admin/moderation"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold text-faiz-800 hover:bg-faiz-50"
+            >
+              <ShieldCheck className="size-4 text-faiz-600" aria-hidden /> Moderation
+            </Link>
+          )}
           <button
             role="menuitem"
             type="button"
