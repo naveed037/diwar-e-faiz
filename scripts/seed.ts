@@ -4,6 +4,8 @@
  * Optional demo data:        npm run firebase:seed -- --demo
  *   - one demo donor + sample listings (approved) and sample success stories (published).
  *     The stories use made-up names, so NEVER use --demo on a production project.
+ * Sample listings only:      npm run firebase:seed -- --demo-listings
+ *   - the demo donor + sample listings, without the made-up success stories.
  * Remove demo data:          npm run firebase:seed -- --remove-demo
  *
  * Idempotent: re-running updates the same documents.
@@ -140,6 +142,8 @@ async function main() {
     await seedDemoListings();
     await seedDemoStories();
   }
+  // Listings only (no made-up success stories) — acceptable on a live site; removable with --remove-demo.
+  if (args.has("--demo-listings") && !args.has("--demo")) await seedDemoListings();
   if (args.has("--remove-demo")) await removeDemoListings();
   await recountCategories();
 }
