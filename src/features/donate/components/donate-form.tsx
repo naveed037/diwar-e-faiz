@@ -146,8 +146,8 @@ export function DonateForm({
       photos.map(async (photo, index) => {
         if (photo.kind === "stored") return photo.path;
         if (photo.path) return photo.path; // uploaded on a previous attempt
-        const blob = await compressImage(photo.file);
-        if (blob.size > STORAGE_LIMITS.donationImageBytes) throw new Error("A photo is larger than 5 MB even after compression.");
+        const blob = await compressImage(photo.file, { maxBytes: STORAGE_LIMITS.donationImageBytes });
+        if (blob.size > STORAGE_LIMITS.donationImageBytes) throw new Error("A photo is larger than 200 KB even after compression. Please try a different photo.");
         const ext = blob.type === "image/jpeg" ? "jpg" : (photo.file.name.split(".").pop() ?? "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
         const path = storagePaths.donationImage(uid, donationId, `${index}-${randomId(12)}.${ext || "jpg"}`);
         const task = uploadBytesResumable(storageRef(storage, path), blob, { contentType: blob.type || photo.file.type });

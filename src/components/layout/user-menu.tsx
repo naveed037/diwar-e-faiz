@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, HandHeart, LogOut, PackageOpen, ShieldCheck, UserRound } from "lucide-react";
+import { ChevronDown, HandHeart, Inbox, LogOut, MessagesSquare, PackageOpen, ShieldCheck, UserRound } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -88,6 +88,12 @@ export function UserMenu() {
           </Link>
           <Link role="menuitem" href="/my-donations" onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm text-ink-800 hover:bg-cream-100">
             <PackageOpen className="size-4 text-sand-500" aria-hidden /> My donations
+          </Link>
+          <Link role="menuitem" href="/requests" onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm text-ink-800 hover:bg-cream-100">
+            <Inbox className="size-4 text-sand-500" aria-hidden /> My requests
+          </Link>
+          <Link role="menuitem" href="/messages" onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm text-ink-800 hover:bg-cream-100">
+            <MessagesSquare className="size-4 text-sand-500" aria-hidden /> Messages
           </Link>
           {user.isAdmin && (
             <Link

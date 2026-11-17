@@ -14,7 +14,7 @@ import { afterAll, beforeAll, beforeEach, describe, it } from "vitest";
 
 let env: RulesTestEnvironment;
 
-const MB = 1024 * 1024;
+const KB = 1024;
 const bytes = (size: number) => new Uint8Array(size);
 const jpeg = { contentType: "image/jpeg" };
 
@@ -46,8 +46,8 @@ describe("listing photos: donations/{uid}/{donationId}/{file}", () => {
     await assertSucceeds(getBytes(ref(anon(), "donations/alice/d1/photo.jpg")));
   });
 
-  it("owner with a verified email can upload an image under 5 MB", async () => {
-    await assertSucceeds(uploadBytes(ref(verified("alice"), "donations/alice/d2/1.jpg"), bytes(2 * MB), jpeg));
+  it("owner with a verified email can upload an image of up to 200 KB", async () => {
+    await assertSucceeds(uploadBytes(ref(verified("alice"), "donations/alice/d2/1.jpg"), bytes(200 * KB), jpeg));
   });
 
   it("rejects unverified emails, other users' folders, anonymous users", async () => {
@@ -56,11 +56,11 @@ describe("listing photos: donations/{uid}/{donationId}/{file}", () => {
     await assertFails(uploadBytes(ref(anon(), "donations/alice/d2/1.jpg"), bytes(1000), jpeg));
   });
 
-  it("rejects non-images, empty files and files of 5 MB or more", async () => {
+  it("rejects non-images, empty files and files over 200 KB", async () => {
     await assertFails(uploadBytes(ref(verified("alice"), "donations/alice/d2/x.pdf"), bytes(1000), { contentType: "application/pdf" }));
     await assertFails(uploadBytes(ref(verified("alice"), "donations/alice/d2/x.svg"), bytes(1000), { contentType: "image/svg+xml" }));
     await assertFails(uploadBytes(ref(verified("alice"), "donations/alice/d2/empty.jpg"), bytes(0), jpeg));
-    await assertFails(uploadBytes(ref(verified("alice"), "donations/alice/d2/big.jpg"), bytes(5 * MB), jpeg));
+    await assertFails(uploadBytes(ref(verified("alice"), "donations/alice/d2/big.jpg"), bytes(200 * KB + 1), jpeg));
   });
 
   it("existing files can't be overwritten; only the owner can delete", async () => {
@@ -71,13 +71,13 @@ describe("listing photos: donations/{uid}/{donationId}/{file}", () => {
 });
 
 describe("avatars: users/{uid}/avatar/{file}", () => {
-  it("owner can upload an image under 2 MB (no verification needed)", async () => {
-    await assertSucceeds(uploadBytes(ref(unverified("alice"), "users/alice/avatar/new.png"), bytes(MB), { contentType: "image/png" }));
+  it("owner can upload an image of up to 200 KB (no verification needed)", async () => {
+    await assertSucceeds(uploadBytes(ref(unverified("alice"), "users/alice/avatar/new.png"), bytes(150 * KB), { contentType: "image/png" }));
   });
 
   it("rejects other users, oversize files and non-images", async () => {
     await assertFails(uploadBytes(ref(verified("bob"), "users/alice/avatar/x.jpg"), bytes(1000), jpeg));
-    await assertFails(uploadBytes(ref(verified("alice"), "users/alice/avatar/big.jpg"), bytes(2 * MB), jpeg));
+    await assertFails(uploadBytes(ref(verified("alice"), "users/alice/avatar/big.jpg"), bytes(200 * KB + 1), jpeg));
     await assertFails(uploadBytes(ref(verified("alice"), "users/alice/avatar/x.txt"), bytes(10), { contentType: "text/plain" }));
   });
 

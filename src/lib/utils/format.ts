@@ -27,3 +27,17 @@ export function formatNumber(value: number) {
 export function photo(id: string, width = 1200) {
   return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${width}&q=80`;
 }
+
+const dateTimeFormatter = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "short",
+  hour: "numeric",
+  minute: "2-digit",
+  hour12: true,
+  timeZone: "Asia/Karachi",
+});
+
+/** "17 Nov, 4:05 pm" in Pakistan time (deterministic on server and client). */
+export function formatDateTime(iso: string) {
+  return dateTimeFormatter.format(new Date(iso));
+}

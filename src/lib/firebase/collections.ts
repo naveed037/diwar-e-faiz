@@ -15,8 +15,9 @@ export const COLLECTIONS = {
 export const PRIVATE_PROFILE_DOC = "profile";
 
 export const STORAGE_LIMITS = {
-  donationImageBytes: 5 * 1024 * 1024,
-  avatarBytes: 2 * 1024 * 1024,
+  // Photos are compressed in the browser to fit; storage.rules and the server enforce the same cap.
+  donationImageBytes: 200 * 1024,
+  avatarBytes: 200 * 1024,
   maxDonationImages: 5,
 } as const;
 

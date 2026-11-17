@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { useAuth } from "@/components/providers/auth-provider";
 import { signOut } from "@/features/auth/lib/auth-client";
+import { NotificationBell } from "@/features/notifications/components/notification-bell";
 import { UserAvatar, UserMenu } from "./user-menu";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
@@ -113,6 +114,7 @@ export function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-2 lg:flex">
+          <NotificationBell />
           <UserMenu />
           <ButtonLink href={ROUTES.donate} size="md">
             <HandHeart className="size-4" aria-hidden />
@@ -120,6 +122,8 @@ export function Navbar() {
           </ButtonLink>
         </div>
 
+        <div className="flex items-center gap-1 lg:hidden">
+        <NotificationBell />
         <Button
           variant="ghost"
           size="icon"
@@ -131,6 +135,7 @@ export function Navbar() {
         >
           {open ? <X className="size-5" /> : <Menu className="size-5" />}
         </Button>
+        </div>
       </Container>
 
       {/* Mobile menu */}
@@ -162,12 +167,18 @@ export function Navbar() {
                 <UserAvatar size={44} />
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold text-ink-900">{auth.user.displayName ?? "Your account"}</p>
-                  <p className="flex gap-3 text-sm font-semibold text-faiz-700">
+                  <p className="flex flex-wrap gap-x-3 gap-y-1 text-sm font-semibold text-faiz-700">
                     <Link href="/profile" onClick={close}>
                       Profile
                     </Link>
                     <Link href="/my-donations" onClick={close}>
                       My donations
+                    </Link>
+                    <Link href="/requests" onClick={close}>
+                      Requests
+                    </Link>
+                    <Link href="/messages" onClick={close}>
+                      Messages
                     </Link>
                     {auth.user.isAdmin && (
                       <Link href="/admin/moderation" onClick={close}>

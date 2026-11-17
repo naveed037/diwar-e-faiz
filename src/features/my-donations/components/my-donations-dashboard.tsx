@@ -2,6 +2,7 @@
 
 import { HandHeart, Inbox, MapPin, MessageSquareText, PackageOpen } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ButtonLink } from "@/components/ui/button";
 import { CategoryIcon } from "@/components/ui/category-icon";
@@ -160,10 +161,13 @@ export function MyDonationsDashboard({
                 <div className="mt-4 flex flex-col gap-4 border-t border-ink-900/5 pt-4 lg:flex-row lg:items-center lg:justify-between">
                   <p className="inline-flex items-center gap-1.5 text-sm text-ink-700">
                     {d.applicationCount > 0 ? (
-                      <>
+                      <Link
+                        href={`/my-donations/${d.id}/requests`}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-faiz-50 px-3 py-1.5 font-semibold text-faiz-800 ring-1 ring-faiz-200 transition hover:bg-faiz-100"
+                      >
                         <MessageSquareText className="size-4 text-faiz-600" aria-hidden />
-                        {d.applicationCount} {d.applicationCount === 1 ? "request" : "requests"}
-                      </>
+                        View {d.applicationCount} {d.applicationCount === 1 ? "request" : "requests"}
+                      </Link>
                     ) : (
                       <>
                         <Inbox className="size-4 text-sand-400" aria-hidden />

@@ -57,7 +57,7 @@ const FIREBASE_CLIENT_MESSAGES: Record<string, string> = {
   "auth/user-not-found": "Email or password is incorrect.",
   "auth/wrong-password": "Email or password is incorrect.",
   "auth/missing-email": "Please enter your email address.",
-  "storage/unauthorized": "Upload was blocked. Photos must be images under 5 MB.",
+  "storage/unauthorized": "Upload was blocked. Photos must be images of 200 KB or less.",
   "storage/canceled": "Upload was cancelled.",
   "storage/quota-exceeded": "Storage is temporarily full. Please try again later.",
   "storage/retry-limit-exceeded": "Upload timed out — check your connection and try again.",

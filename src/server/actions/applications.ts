@@ -70,7 +70,7 @@ export async function applyForDonation(input: unknown): Promise<ActionResult<{ a
         type: "application_received",
         title: "New request for your item",
         body: `${applicant.displayName} would like “${donation.title}”.`,
-        link: `/donations/${donationId}`,
+        link: `/my-donations/${donationId}/requests`,
         actorId: user.uid,
       });
     });
@@ -105,7 +105,7 @@ export async function decideApplication(input: unknown): Promise<ActionResult> {
           type: "application_declined",
           title: "Request not accepted",
           body: `The donor chose someone else for “${app.donation.title}”. Keep looking — new items arrive daily.`,
-          link: "/donations",
+          link: "/requests",
           actorId: user.uid,
         });
         return;
@@ -166,11 +166,13 @@ export async function withdrawApplication(input: unknown): Promise<ActionResult>
         tx.update(donationRef, { status: "available", reservedFor: null, updatedAt: now });
       }
       tx.update(appRef, { status: "withdrawn", updatedAt: now });
+      // Keep the listing's request count to active requests (re-requesting increments it again).
+      tx.update(db.collection(COLLECTIONS.donations).doc(app.donationId), { applicationCount: FieldValue.increment(-1), updatedAt: now });
       queueNotification(tx, app.donorId, {
         type: "application_declined",
         title: "A request was withdrawn",
         body: `${app.applicant.displayName} withdrew their request for “${app.donation.title}”.`,
-        link: `/donations/${app.donationId}`,
+        link: `/my-donations/${app.donationId}/requests`,
         actorId: user.uid,
       });
     });

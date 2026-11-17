@@ -60,7 +60,7 @@ async function verifyUploadedImages(uid: string, donationId: string, paths: stri
       if (!exists) throw new AppError("invalid-input", "A photo didn't finish uploading. Please add it again.");
       const [meta] = await file.getMetadata();
       if (!String(meta.contentType).startsWith("image/") || Number(meta.size) > STORAGE_LIMITS.donationImageBytes) {
-        throw new AppError("invalid-input", "Photos must be images under 5 MB.");
+        throw new AppError("invalid-input", "Photos must be images of 200 KB or less.");
       }
       // storage.rules grants public read on donations/**, so no download token is needed.
       return { path, url: `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(path)}?alt=media` };
@@ -237,7 +237,7 @@ export async function setDonationStatus(input: unknown): Promise<ActionResult> {
             type: "application_declined",
             title: "Reservation released",
             body: `The donor made “${donation.title}” available again.`,
-            link: "/donations",
+            link: "/requests",
             actorId: user.uid,
           });
         }

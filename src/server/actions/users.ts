@@ -68,7 +68,7 @@ async function verifyAvatar(uid: string, path: string) {
   if (!exists) throw new AppError("invalid-input", "Photo upload didn't finish. Please try again.");
   const [meta] = await file.getMetadata();
   if (!String(meta.contentType).startsWith("image/") || Number(meta.size) > STORAGE_LIMITS.avatarBytes) {
-    throw new AppError("invalid-input", "Profile photos must be images under 2 MB.");
+    throw new AppError("invalid-input", "Profile photos must be images of 200 KB or less.");
   }
   return `https://firebasestorage.googleapis.com/v0/b/${adminBucket().name}/o/${encodeURIComponent(path)}?alt=media`;
 }

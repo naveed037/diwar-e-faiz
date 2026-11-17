@@ -23,24 +23,24 @@ service firebase.storage {
     function isImageUnder(maxBytes) {
       return request.resource.contentType.matches('image/(jpeg|jpg|png|webp|gif|heic|heif)')
         && request.resource.size > 0
-        && request.resource.size < maxBytes;
+        && request.resource.size <= maxBytes;
     }
 
-    // donations/{uid}/{donationId}/{file} — listing photos (≤ 5 MB). Verified email required, like donating.
+    // donations/{uid}/{donationId}/{file} — listing photos (≤ 200 KB, compressed in the browser). Verified email required, like donating.
     match /donations/{uid}/{donationId}/{fileName} {
       allow read: if true;
       allow create: if isOwner(uid)
         && isNewFile()
         && request.auth.token.email_verified == true
-        && isImageUnder(5 * 1024 * 1024);
+        && isImageUnder(200 * 1024);
       allow update: if false;
       allow delete: if isOwner(uid);
     }
 
-    // users/{uid}/avatar/{file} — profile pictures (≤ 2 MB).
+    // users/{uid}/avatar/{file} — profile pictures (≤ 200 KB).
     match /users/{uid}/avatar/{fileName} {
       allow read: if true;
-      allow create: if isOwner(uid) && isNewFile() && isImageUnder(2 * 1024 * 1024);
+      allow create: if isOwner(uid) && isNewFile() && isImageUnder(200 * 1024);
       allow update: if false;
       allow delete: if isOwner(uid);
     }

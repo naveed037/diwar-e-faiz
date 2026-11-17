@@ -15,7 +15,7 @@ import { CITIES } from "@/constants/site";
 import { firebaseErrorMessage } from "@/lib/errors";
 import { getFirebaseStorage } from "@/lib/firebase/client";
 import { STORAGE_LIMITS, storagePaths } from "@/lib/firebase/collections";
-import { randomId } from "@/lib/utils/image";
+import { ImageTooLargeError, compressImage, randomId } from "@/lib/utils/image";
 import { completeRegistrationSchema } from "@/lib/validation/schemas";
 import { completeRegistration, updateProfile } from "@/server/actions/users";
 import { FormAlert, Spinner } from "@/features/auth/components/auth-bits";
@@ -67,7 +67,8 @@ export function ProfileForm({ mode, initial, next }: { mode: "setup" | "edit"; i
   function pickPhoto(file: File | undefined) {
     if (!file) return;
     if (!file.type.startsWith("image/")) return setErrors((e) => ({ ...e, photo: "Please choose an image file." }));
-    if (file.size > STORAGE_LIMITS.avatarBytes) return setErrors((e) => ({ ...e, photo: "Profile photos must be under 2 MB." }));
+    // Very large originals are refused up front; everything else is compressed to ≤ 200 KB on save.
+    if (file.size > 25 * 1024 * 1024) return setErrors((e) => ({ ...e, photo: "That photo is too large. Please choose one under 25 MB." }));
     if (photoPreview?.startsWith("blob:")) URL.revokeObjectURL(photoPreview);
     setErrors((e) => ({ ...e, photo: undefined }));
     setPhotoFile(file);
@@ -107,9 +108,10 @@ export function ProfileForm({ mode, initial, next }: { mode: "setup" | "edit"; i
 
       let photoPath: string | null | undefined;
       if (photoFile && user) {
-        const ext = (photoFile.name.split(".").pop() ?? "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
+        const blob = await compressImage(photoFile, { maxBytes: STORAGE_LIMITS.avatarBytes, maxDimension: 512 });
+        const ext = blob.type === "image/jpeg" ? "jpg" : (photoFile.name.split(".").pop() ?? "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
         photoPath = storagePaths.avatar(user.uid, `${randomId(12)}.${ext || "jpg"}`);
-        await uploadBytes(storageRef(getFirebaseStorage(), photoPath), photoFile, { contentType: photoFile.type });
+        await uploadBytes(storageRef(getFirebaseStorage(), photoPath), blob, { contentType: blob.type || photoFile.type });
       } else if (photoRemoved) {
         photoPath = null;
       }
@@ -122,7 +124,7 @@ export function ProfileForm({ mode, initial, next }: { mode: "setup" | "edit"; i
       toast("Profile saved.");
       router.refresh();
     } catch (error) {
-      failWith(firebaseErrorMessage(error));
+      failWith(error instanceof ImageTooLargeError ? error.message : firebaseErrorMessage(error));
     } finally {
       setPending(false);
     }
@@ -151,7 +153,7 @@ export function ProfileForm({ mode, initial, next }: { mode: "setup" | "edit"; i
             <h2 id="photo-heading" className="font-semibold text-ink-900">
               Profile picture
             </h2>
-            <p className="mt-0.5 text-sm text-sand-600">A friendly photo helps people trust you. JPG or PNG, under 2 MB.</p>
+            <p className="mt-0.5 text-sm text-sand-600">A friendly photo helps people trust you. JPG or PNG — we resize it for you.</p>
             <div className="mt-3 flex flex-wrap gap-2">
               <Button variant="secondary" size="sm" onClick={() => fileRef.current?.click()}>
                 <Camera className="size-4" aria-hidden />
